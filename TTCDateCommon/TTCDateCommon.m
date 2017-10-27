@@ -184,7 +184,7 @@
     
     //判断某时间跟现在相差多少天
     NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *components = [calendar components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit
+    NSDateComponents *components = [calendar components:NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitDay
                                                fromDate:dateA toDate:dateB options:0];
     int year = (int)[components year];//相差年数
     int month = (int)[components month];//相差月数
@@ -331,7 +331,7 @@
     NSCalendar *calendar = [NSCalendar currentCalendar];
     
     [calendar setFirstWeekday:2];//设定周一为周首日
-    BOOL ok = [calendar rangeOfUnit:NSMonthCalendarUnit startDate:&beginDate interval:&interval forDate:newDate];
+    BOOL ok = [calendar rangeOfUnit:NSCalendarUnitMonth startDate:&beginDate interval:&interval forDate:newDate];
     //分别修改为 NSDayCalendarUnit NSWeekCalendarUnit NSYearCalendarUnit
     if (ok) {
         endDate = [beginDate dateByAddingTimeInterval:interval-1];
