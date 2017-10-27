@@ -248,7 +248,7 @@
     }
     return precisionStr;
 }
-+ (NSInteger )TTC_spacingDateWithDateA:(NSDate *)dateA andDateB:(NSDate *)dateB datePrecision:(DatePrecision)datePrecision
++ (NSInteger)TTC_spacingDateWithDateA:(NSDate *)dateA andDateB:(NSDate *)dateB datePrecision:(DatePrecision)datePrecision
 {
     
     //判断某时间跟现在相差多少天
@@ -356,7 +356,7 @@
     NSDate *currentDate = [NSDate date];
     if ([currentDate compare:date8]==NSOrderedDescending && [currentDate compare:date23]==NSOrderedAscending)
     {
-        DLog(@"该时间在 %ld:%ld-%ld:%ld 之间！", fromHour, fromMin, toHour, toMin);
+        DLog(@"该时间在 %ld:%ld-%ld:%ld 之间！", (long)fromHour, (long)fromMin, (long)toHour, (long)toMin);
         return YES;
     }
     else

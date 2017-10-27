@@ -119,7 +119,7 @@ typedef NS_ENUM(NSInteger, DateStyle) {
  
  *  @return 时间间隔
  */
-+ (NSInteger)TTC_spacingDateWithDateA:(NSDate *)dateA andDateB:(NSDate *)dateB datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle;
++ (NSInteger)TTC_spacingDateWithDateA:(NSDate *)dateA andDateB:(NSDate *)dateB datePrecision:(DatePrecision)datePrecision;
 /**
  *  获取时间戳
  *
