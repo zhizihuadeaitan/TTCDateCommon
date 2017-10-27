@@ -17,14 +17,14 @@
 
 #pragma mark -单独取日期中的年月日请在这里面找
 //0==>只取年月，1==>只取年月日，2==>取小时
-+ (NSString *)TTC_dateTimeConvertYearMonth:(NSDate *)date andType:(int)type
++ (NSString *)TTC_dateTimeConvertYearMonth:(NSDate *)date datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
     NSString *styles = [[NSString alloc]init];
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    styles = [self datePrecision:datePrecision dateStyle:dateStyle];
     
-    
-    switch (type) {
+    switch (datePrecision) {
         case 0:
             styles = @"yyyy-MM";
             break;
@@ -59,27 +59,27 @@
 
 #pragma mark -其它待分类
 //时间戳转换字符串
-+ (NSString *)TTC_datetimeConversionAndDatetime:(int)datetime datePrecision:(DatePrecision)datePrecision
++ (NSString *)TTC_datetimeConversionAndDatetime:(int)datetime datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
     NSDate *confromTimesp = [NSDate dateWithTimeIntervalSince1970:datetime];
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateStyle:NSDateFormatterMediumStyle];
     [formatter setTimeStyle:NSDateFormatterShortStyle];
-    [formatter setDateFormat:[self datePrecision:datePrecision]]; // -----
+    [formatter setDateFormat:[self datePrecision:datePrecision dateStyle:dateStyle]]; // -----
     NSString *nowtimeStr = [formatter stringFromDate:confromTimesp];
     return nowtimeStr;
 }
 
 
 //字符串转为NSDate
-+ (NSDate*)TTC_datetimeConversionAndDatetimeStr:(NSString *)dateStr datePrecision:(DatePrecision)datePrecision
++ (NSDate*)TTC_datetimeConversionAndDatetimeStr:(NSString *)dateStr datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
     //    dateStr = @"2015-1-23 22:32:32";
     
     //将传入时间转化成需要的格式
     NSDateFormatter *format=[[NSDateFormatter alloc] init];
     //    [format setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [format setDateFormat:[self datePrecision:datePrecision]];
+    [format setDateFormat:[self datePrecision:datePrecision dateStyle:dateStyle]];
     
     NSDate *fromdate=[format dateFromString:dateStr];
     NSTimeZone *fromzone = [NSTimeZone systemTimeZone];
@@ -127,9 +127,38 @@
     return 0;
     
 }
-+ (NSString *)datePrecision:(DatePrecision)datePrecision
++ (NSString *)dateStyle:(DateStyle)dateStyle
 {
+    NSString *dateStyleStr;
+    switch (dateStyle) {
+        case DateStyle_Slash:
+        {
+            dateStyleStr = @"/";
+        }
+            break;
+        case DatePrecision_Bridge:
+        {
+            dateStyleStr = @"-";
+            
+        }
+            break;
+        case DatePrecision_Spot:
+        {
+            dateStyleStr = @".";
+            
+        }
+            break;
+            
+        default:
+            break;
+    }
+    return dateStyleStr;
+}
++ (NSString *)datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
+{
+    NSString *dateStyleStr = [self dateStyle:dateStyle];
     NSString *precisionStr;
+    
     switch (datePrecision) {
         case DatePrecision_Year:
         {
@@ -139,41 +168,81 @@
             break;
         case DatePrecision_Month:
         {
-            precisionStr = @"yyyy-MM";
+            precisionStr = [NSString stringWithFormat:@"yyyy%@MM",dateStyleStr];
             
         }
             break;
             
         case DatePrecision_Date:
         {
-            precisionStr = @"yyyy-MM-dd";
+            precisionStr = [NSString stringWithFormat:@"yyyy%@MM%@dd",dateStyleStr,dateStyleStr];
+            
         }
             break;
         case DatePrecision_Hour:
         {
-            precisionStr = @"yyyy-MM-dd HH";
+            precisionStr = [NSString stringWithFormat:@"yyyy%@MM%@dd HH",dateStyleStr,dateStyleStr];
+            
             
         }
             break;
         case DatePrecision_Minutes:
         {
-            precisionStr = @"yyyy-MM-dd HH:mm";
+            precisionStr = [NSString stringWithFormat:@"yyyy%@MM%@dd HH:mm",dateStyleStr,dateStyleStr];
             
         }
             break;
         case DatePrecision_Seconds:
         {
-            precisionStr = @"yyyy-MM-dd HH:mm:ss";
+            precisionStr = [NSString stringWithFormat:@"yyyy%@MM%@dd HH:mm:ss",dateStyleStr,dateStyleStr];
+            
             
         }
             break;
         case DatePrecision_Ms:
         {
-            precisionStr = @"yyyy-MM-dd HH:mm:ss:SSS";
+            precisionStr = [NSString stringWithFormat:@"yyyy%@MM%@dd HH:mm:ss:SSS",dateStyleStr,dateStyleStr];
             
         }
             break;
-            
+            case DatePrecision_OnlyMonth:
+        {
+            precisionStr = @"MM";
+
+        }
+            break;
+       
+        case DatePrecision_OnlyDate:
+        {
+            precisionStr = @"dd";
+
+        }
+            break;
+        case DatePrecision_OnlyHour:
+        {
+            precisionStr = @"HH";
+
+       
+        }
+            break;
+        case DatePrecision_OnlyMinutes:
+        {
+            precisionStr = @"mm";
+
+        }
+            break;
+        case DatePrecision_OnlySeconds:
+        {
+            precisionStr = @"ss";
+
+        }
+            break;
+        case DatePrecision_OnlyMs:
+        {
+            precisionStr = @"SSS";
+
+        }
+            break;
         default:
             break;
     }
@@ -194,7 +263,7 @@
     int second = (int)[components second];//相差秒
     int ms = (int)[components nanosecond];//相差毫秒
     
-    NSInteger spacing;
+    NSInteger spacing = 0;
     switch (datePrecision) {
         case DatePrecision_Year:
         {
@@ -238,6 +307,8 @@
         }
             break;
         default:
+            spacing = ms;
+
             break;
     }
     
@@ -246,13 +317,14 @@
 
 
 
-+ (NSString *)TTC_lastOrNextMonthWith:(NSDateComponents *)cmp andSpan:(int)span andType:(int)type
++ (NSString *)TTC_lastOrNextMonthWith:(NSDateComponents *)cmp andSpan:(int)span
+                              datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
     NSCalendar *calender = [NSCalendar currentCalendar];//获取NSCalender单例。
     //    NSDateComponents *cmp = [calender components:(NSMonthCalendarUnit | NSYearCalendarUnit) fromDate:date]; //设置属性，因为我只需要年和月，这个属性还可以支持时，分，秒。
     DLog(@"%ld",(long)[cmp month]);
-    switch (type) {
-        case 0:
+    switch (datePrecision) {
+        case DatePrecision_Month:
             [cmp setMonth:[cmp month] - span];//设置上个月，即在现有的基础上减去一个月。这个地方可以灵活的支持跨年了，免去了繁琐的计算年份的工作。
             
             break;
@@ -264,26 +336,16 @@
             break;
     }
     NSDate *lastMonDate = [calender dateFromComponents:cmp];//拿到上个月的NSDate，再用NSDateFormatter就可以拿到单独的年和月了。
-    return [self TTC_dateTimeConvertYearMonth:lastMonDate andType:0];
+    return [self TTC_dateTimeConvertYearMonth:lastMonDate datePrecision:DatePrecision_Month dateStyle:dateStyle];
 }
-//比较两个日期的大小,仅支持年月日
-+ (NSComparisonResult)TTC_compareDateA:(NSDate *)dateA
-                             WithDateB:(NSDate *)dateB datePrecision:(DatePrecision)datePrecision
+
++ (NSComparisonResult)TTC_compareDateStrA:(NSString *)dateA WithDateStrB:(NSString *)dateB datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:[self datePrecision:datePrecision]];
-    NSString *oneDayStr = [dateFormatter stringFromDate:dateA];
-    NSString *anotherDayStr = [dateFormatter stringFromDate:dateB];
-    NSDate *dateC = [dateFormatter dateFromString:oneDayStr];
-    NSDate *dateD = [dateFormatter dateFromString:anotherDayStr];
+    [dateFormatter setDateFormat:[self datePrecision:DatePrecision_Date dateStyle:DateStyle_Slash]];
+    NSDate *dateC = [dateFormatter dateFromString:dateA];
+    NSDate *dateD = [dateFormatter dateFromString:dateB];
     NSComparisonResult resultt = [dateC compare:dateD];
-    
-    
-    //typedef NS_ENUM(NSInteger, NSComparisonResult)
-    //{
-    //   NSOrderedAscending = -1L, NSOrderedSame, NSOrderedDescending
-    //};
-    
     return resultt;
 }
 
@@ -319,11 +381,12 @@
     NSCalendar *resultCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     return [resultCalendar dateFromComponents:resultComps];
 }
-+ (NSArray *)TTC_getMonthBeginAndEndWith:(NSString *)dateStr
++ (NSArray *)TTC_getMonthBeginAndEndWith:(NSString *)dateStr datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
-    
+    NSString *dateStyleStr = [self datePrecision:datePrecision dateStyle:dateStyle];
+
     NSDateFormatter *format=[[NSDateFormatter alloc] init];
-    [format setDateFormat:@"yyyy-MM-dd"];
+    [format setDateFormat:dateStyleStr];
     NSDate *newDate=[format dateFromString:dateStr];
     double interval = 0;
     NSDate *beginDate = nil;
@@ -339,19 +402,19 @@
         return @[@"",@""];
     }
     NSDateFormatter *myDateFormatter = [[NSDateFormatter alloc] init];
-    [myDateFormatter setDateFormat:@"yyyy-MM-dd"];
+    [myDateFormatter setDateFormat:[NSString stringWithFormat:@"yyyy%@MM%@dd",[self dateStyle:dateStyle],[self dateStyle:dateStyle]]];
     NSString *beginString = [myDateFormatter stringFromDate:beginDate];
     NSString *endString = [myDateFormatter stringFromDate:endDate];
     return @[beginString, endString];
 }
-+ (NSString *)TTC_datetimeConversionAndDatetimeWithDate:(NSDate *)date datePrecision:(DatePrecision)datePrecision
++ (NSString *)TTC_datetimeConversionAndDatetimeWithDate:(NSDate *)date datePrecision:(DatePrecision)datePrecision dateStyle:(DateStyle)dateStyle
 {
     
     NSDate *  senddate = date;
     
     NSDateFormatter  *dateformatter=[[NSDateFormatter alloc] init];
     
-    [dateformatter setDateFormat:[self datePrecision:datePrecision]];
+    [dateformatter setDateFormat:[self datePrecision:datePrecision dateStyle:dateStyle]];
     
     NSString *  locationString=[dateformatter stringFromDate:senddate];
     NSLog(@"日期：%@",locationString);
